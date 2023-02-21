@@ -2,12 +2,12 @@
 
 import cv2
 import time
-import matplotlib.pyplot as plt
-import numpy as np
+# import matplotlib.pyplot as plt
+# import numpy as np
 
 # 設定値
-HUMAN_THRESHOLD=2000  #500~2000?
-FRAME_RATE=10  #1~10?
+HUMAN_THRESHOLD=2000
+FRAME_RATE=10
 
 # 検知結果
 prev_exist=False
@@ -99,9 +99,9 @@ while True:
     # print(human_exist)
     
     #グラフに記録
-    time_list.append(time.time())
-    plotn_list.append(rect_num)
-    plotc_list.append(count)
+    # time_list.append(time.time())
+    # plotn_list.append(rect_num)
+    # plotc_list.append(count)
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
@@ -121,7 +121,8 @@ while True:
 cap.release()
 cv2.destroyAllWindows()
 
-plt.scatter(time_list,plotn_list)
-plt.show()
-plt.scatter(time_list,plotc_list)
-plt.show()
+# グラフを表示
+# plt.scatter(time_list,plotn_list)
+# plt.show()
+# plt.scatter(time_list,plotc_list)
+# plt.show()
