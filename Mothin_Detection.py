@@ -2,14 +2,21 @@
 
 import cv2
 import time
+import matplotlib.pyplot as plt
+import numpy as np
 
 # 設定値
-HUMAN_THRESHOLD=500  #500~2000?
+HUMAN_THRESHOLD=2000  #500~2000?
 FRAME_RATE=10  #1~10?
 
 # 検知結果
 prev_exist=False
 human_exist=False
+
+# グラフデータ
+time_list=[]
+plotn_list=[]
+plotc_list=[]
 
 # カメラのキャプチャを開始する
 cap = cv2.VideoCapture(0)
@@ -57,7 +64,11 @@ while True:
         center_y = y + h // 2
         center_sum_x += center_x
         center_sum_y += center_y
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
+        if(human_exist):
+            color=(0, 0, 255)
+        else:
+            color=(255,255,0)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
 
     # 変化が大きければOを、そうでなければXを表示
     centroid=None
@@ -85,7 +96,12 @@ while True:
     # print('面積の総和:', count)
     # print('重心座標:', centroid)
     
-    print(human_exist)
+    # print(human_exist)
+    
+    #グラフに記録
+    time_list.append(time.time())
+    plotn_list.append(rect_num)
+    plotc_list.append(count)
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
@@ -104,3 +120,8 @@ while True:
 # キャプチャをリリースし、ウィンドウを閉じる
 cap.release()
 cv2.destroyAllWindows()
+
+plt.scatter(time_list,plotn_list)
+plt.show()
+plt.scatter(time_list,plotc_list)
+plt.show()
