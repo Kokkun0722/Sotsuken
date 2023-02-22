@@ -1,6 +1,7 @@
 import os
 import json
 from flask import Flask, request, abort
+from waitress import serve
 
 from linebot import (
     LineBotApi, WebhookHandler
@@ -49,4 +50,7 @@ def handle_message(event):
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    # app.run(host="0.0.0.0", port=port)
+    serve(app, host='0.0.0.0', port=port)
+    
+# http://127.0.0.1:5000/
