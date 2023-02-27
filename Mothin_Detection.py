@@ -61,10 +61,6 @@ while True:
         x, y, w, h = cv2.boundingRect(contour)
         rect_num += 1
         count += w * h
-        center_x = x + w // 2
-        center_y = y + h // 2
-        center_sum_x += center_x
-        center_sum_y += center_y
         if(human_exist):
             color=(0, 0, 255)
         else:
@@ -74,11 +70,6 @@ while True:
     # 変化が大きければOを、そうでなければXを表示
     centroid=None
     if(count>HUMAN_THRESHOLD):
-        if rect_num > 0:
-            center_x = int(center_sum_x / rect_num)
-            center_y = int(center_sum_y / rect_num)
-            cv2.circle(frame, (center_x, center_y), 5, (0, 255, 0), -1)
-            centroid=(center_x, center_y)
         human_exist=True
     else:
         human_exist=False
@@ -94,12 +85,14 @@ while True:
         print("書き記す！！！")
         cv2.imwrite("output.jpg", frame)
         
-        if(human_move>1):
+        if(human_move==1):
             message="入室"
         else:
             message="退室"
-            
-        payload = {"message" :  "\n"+str(message)}
+        
+        dt_now = datetime.datetime.now()
+        
+        payload = {"message" :  "\n"+str(dt_now)+"\n"+str(message)}
         image = r'C:\Users\kokku\output.jpg'
         files = {'imageFile': open(image, 'rb')}
         
