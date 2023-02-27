@@ -1,9 +1,5 @@
-# このプログラムは、カメラからの入力を使用して、フレーム間での変化を検出しています。変化が閾値より大きい場合は、赤い長方形と緑色の円を表示して、「O」を出力し、変化が小さい場合は「X」を出力します。フレームレートを設定し、カメラからの入力を待つために時間を少し遅らせています。このプログラムを実行することで、カメラで何かが動いたときにアラートを受け取ることができます。
-
 import cv2
 import time
-# import matplotlib.pyplot as plt
-# import numpy as np
 
 # 設定値
 HUMAN_THRESHOLD=2000
@@ -12,11 +8,7 @@ FRAME_RATE=10
 # 検知結果
 prev_exist=False
 human_exist=False
-
-# グラフデータ
-time_list=[]
-plotn_list=[]
-plotc_list=[]
+human_move=0
 
 # カメラのキャプチャを開始する
 cap = cv2.VideoCapture(0)
@@ -25,6 +17,7 @@ cap = cv2.VideoCapture(0)
 prev_frame = None
 
 while True:
+
     # カメラからフレームを取得する
     ret, frame = cap.read()
 
@@ -81,27 +74,12 @@ while True:
         human_exist=True
     else:
         human_exist=False
-    
-    #人間の存在の変化を示す
-    if(human_exist>prev_exist):
-        print("入室")
-    elif(human_exist<prev_exist):
-        print("退出")
         
-    
     # 結果を表示する
+    human_move=human_exist-prev_exist
+    print(human_exist,human_move)        
+
     cv2.imshow('frame', frame)
-    
-    # print('長方形の数:', rect_num)
-    # print('面積の総和:', count)
-    # print('重心座標:', centroid)
-    
-    # print(human_exist)
-    
-    #グラフに記録
-    # time_list.append(time.time())
-    # plotn_list.append(rect_num)
-    # plotc_list.append(count)
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
@@ -120,9 +98,3 @@ while True:
 # キャプチャをリリースし、ウィンドウを閉じる
 cap.release()
 cv2.destroyAllWindows()
-
-# グラフを表示
-# plt.scatter(time_list,plotn_list)
-# plt.show()
-# plt.scatter(time_list,plotc_list)
-# plt.show()
