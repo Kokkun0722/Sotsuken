@@ -1,14 +1,16 @@
 import cv2
 import time
+import os
 
 # 設定値
 HUMAN_THRESHOLD=2000
-FRAME_RATE=10
+FRAME_RATE=0.5
 
 # 検知結果
 prev_exist=False
 human_exist=False
 human_move=0
+
 
 # カメラのキャプチャを開始する
 cap = cv2.VideoCapture(0)
@@ -80,6 +82,11 @@ while True:
     print(human_exist,human_move)        
 
     cv2.imshow('frame', frame)
+    
+    #別の処理を行う
+    if(human_move==1):
+        print("書き記す！！！")
+        cv2.imwrite("output.jpg", frame)
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
