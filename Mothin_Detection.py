@@ -1,6 +1,8 @@
 import cv2
 import time
 import os
+import requests
+import datetime,pytz
 
 # 設定値
 HUMAN_THRESHOLD=2000
@@ -11,6 +13,10 @@ prev_exist=False
 human_exist=False
 human_move=0
 
+# 画像送信の定数
+url = "https://notify-api.line.me/api/notify" 
+token = "XfeZrJIh1meAmMM38vJVlDoKvfzY2HrX2PpPEFqWRir"
+headers = {"Authorization" : "Bearer "+ token} 
 
 # カメラのキャプチャを開始する
 cap = cv2.VideoCapture(0)
@@ -84,9 +90,21 @@ while True:
     cv2.imshow('frame', frame)
     
     #別の処理を行う
-    if(human_move==1):
+    if(human_move!=0):
         print("書き記す！！！")
         cv2.imwrite("output.jpg", frame)
+        
+        if(human_move>1):
+            message="入室"
+        else:
+            message="退室"
+            
+        payload = {"message" :  "\n"+str(message)}
+        image = r'C:\Users\kokku\output.jpg'
+        files = {'imageFile': open(image, 'rb')}
+        
+        print("送信！")
+        res = requests.post(url,params=payload,headers=headers,files=files)
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
