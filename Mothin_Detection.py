@@ -32,7 +32,7 @@ while True:
     if not ret:
         break
 
-    # グレースケールに変換する
+    # 1.特殊なグレースケールで、明度に関係ない判別を行う。
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # 初めてのフレームの場合は前フレームを更新する
