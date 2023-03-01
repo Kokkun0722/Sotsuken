@@ -1,3 +1,5 @@
+# 卓上ライトのオンオフでも反応しやがる
+
 import cv2
 import time
 import requests
