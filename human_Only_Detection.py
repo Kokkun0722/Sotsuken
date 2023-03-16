@@ -1,68 +1,132 @@
+# このプログラムは、
+# Webカメラを使って監視カメラのようなものを作り、
+# 人が部屋に入ったり出たりした場合に、
+# その瞬間の画像と入室/退室のタイムスタンプを
+# LINE Notifyを使って送信するプログラムです。
+
 import cv2
-import numpy as np
+import time
+import requests
+import datetime
 
-BLUR = 21
-CANNY_THRESH_1 = 10
-CANNY_THRESH_2 = 200
-MASK_DILATE_ITER = 10
-MASK_ERODE_ITER = 10
-MASK_COLOR = (0.0,0.0,1.0)
+# 設定値
+HUMAN_THRESHOLD=5000
+FRAME_RATE=2
 
-def GrayScale(img):
-    # グレースケール
-    gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-    
-    # エッジ認識
-    edges = cv2.Canny(gray, CANNY_THRESH_1, CANNY_THRESH_2)
-    edges = cv2.dilate(edges, None)
-    edges = cv2.erode(edges, None)
-    
-    # 輪郭を見つける
-    contour_info = []
-    contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+SENDABLE=False
 
-    for c in contours:
-        contour_info.append((
-            c,
-            cv2.isContourConvex(c),
-            cv2.contourArea(c),
-        ))
-    contour_info = sorted(contour_info, key=lambda c: c[2], reverse=True)
-    max_contour = contour_info[0]
-    
-    # 一番大きい輪郭を使ってマスクを作る
-    mask = np.zeros(edges.shape)
-    cv2.fillConvexPoly(mask, max_contour[0], (255))
-    
-    # マスクをスムージングさせ、3チャネルにする
-    mask = cv2.dilate(mask, None, iterations=MASK_DILATE_ITER)
-    mask = cv2.erode(mask, None, iterations=MASK_ERODE_ITER)
-    mask = cv2.GaussianBlur(mask, (BLUR, BLUR), 0)
-    mask_stack = np.dstack([mask]*3)    # Create 3-channel alpha mask
+# 検知結果
+prev_exist=False
+human_exist=False
+human_move=0
 
-    return mask_stack
+# 画像送信の定数
+url = "https://notify-api.line.me/api/notify" 
+token = "XfeZrJIh1meAmMM38vJVlDoKvfzY2HrX2PpPEFqWRir"
+headers = {"Authorization" : "Bearer "+ token} 
 
-# 動体検知のための背景差分法のインスタンスを作成する
-fgbg = cv2.createBackgroundSubtractorMOG2()
-
-# カメラからの入力を取得する
+# カメラのキャプチャを開始する
 cap = cv2.VideoCapture(0)
 
+# 前フレームの画像
+prev_frame = None
+
 while True:
-    # フレームを読み込む
+
+    # カメラからフレームを取得する
     ret, frame = cap.read()
 
-    # 背景差分法を適用する
-    gray=GrayScale(frame)
-
-    # 結果を表示する
-    # cv2.imshow('frame', frame)
-    cv2.imshow('fgmask', gray)
-
-    # キー入力を待つ
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    # キャプチャに失敗した場合は終了する
+    if not ret:
         break
 
-# 後処理
+    # グレースケールに変換する
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # 初めてのフレームの場合は前フレームを更新する
+    if prev_frame is None:
+        prev_frame = gray
+        continue
+
+    # 面積の総和
+    count = 0
+    
+    # 2つのフレームの差分を求める
+    diff = cv2.absdiff(prev_frame, gray)
+
+    # 閾値を設定して、差分画像を2値化する
+    thresh = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)[1]
+
+    # 輪郭を抽出する
+    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 輪郭があれば、変化があったことを示す赤い矩形を描画する
+    rect_num = 0
+    center_sum_x = 0
+    center_sum_y = 0
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        rect_num += 1
+        count += w * h
+        if(human_exist):
+            color=(0, 0, 255)
+        else:
+            color=(255,255,0)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
+
+    # 変化が大きければOを、そうでなければXを表示
+    centroid=None
+    if(count>HUMAN_THRESHOLD):
+        human_exist=True
+    else:
+        human_exist=False
+        
+    # 結果を表示する
+    human_move=human_exist-prev_exist
+    print(human_exist,human_move,count)        
+
+    cv2.imshow('frame', frame)
+    
+    #別の処理を行う
+    if(human_move!=0):
+        print("書き記す！！！")
+        # time.sleep(2)
+        if(SENDABLE):
+            cv2.imwrite("output.jpg", frame)
+            time.sleep(1)
+        
+        if(human_move==1):
+            message="入室"
+        else:
+            message="退室"
+        
+        if(SENDABLE):
+            dt_now = datetime.datetime.now()
+            
+            payload = {"message" :  "\n"+str(dt_now)+"\n"+str(message)}
+            image = r'C:\Users\kokku\output.jpg'
+            try:
+                files = {'imageFile': open(image, 'rb')}
+            except:
+                files = {}
+            
+            print("送信！")
+            res = requests.post(url,params=payload,headers=headers,files=files)
+    
+    # 現在のフレームを前フレームとして更新する
+    prev_frame = gray
+    prev_exist=human_exist
+
+    # キー入力を待つ
+    key = cv2.waitKey(1) & 0xFF
+
+    # 'q'キーが押された場合は終了する
+    if key == ord('q'):
+        break
+    
+    # 少し待つ
+    time.sleep(1/FRAME_RATE)
+
+# キャプチャをリリースし、ウィンドウを閉じる
 cap.release()
 cv2.destroyAllWindows()
