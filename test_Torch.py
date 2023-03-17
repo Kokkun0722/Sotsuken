@@ -1,59 +1,37 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-import time
-
 import torch
 import torchvision
 from torchvision import transforms
 
-# カメラのキャプチャを開始する
-cap = cv2.VideoCapture(0)
+image_path = r"C:\Users\kokku\Desktop\Sotuken_Camera_Program\man.jpeg"
+img = cv2.imread(image_path)
+img = img[...,::-1] #BGR->RGB
+h,w,_ = img.shape
+img = cv2.resize(img,(320,320))
 
-# 前フレームの画像
-prev_frame = None
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+model = torchvision.models.segmentation.deeplabv3_resnet101(pretrained=True)
+model = model.to(device)
+model.eval();
 
-def Diff_to_Thresh(diff):
-    thresh = cv2.threshold(diff, 30, 255, cv2.THRESH_BINARY)[1]
-    return thresh
+preprocess = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+input_tensor = preprocess(img)
+input_batch = input_tensor.unsqueeze(0).to(device)
 
-while True:
-
-    # カメラからフレームを取得する
-    ret, frame = cap.read()
-
-    # キャプチャに失敗した場合は終了する
-    if not ret:
-        break
-
-    # グレースケールに変換する
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    # 初めてのフレームの場合は前フレームを更新する
-    if prev_frame is None:
-        prev_frame = gray
-        continue
-    
-    # 2つのフレームの差分を求める
-    diff = cv2.absdiff(prev_frame, gray)
-
-    # 輪郭を抽出する
-    thresh=Diff_to_Thresh(diff)
-    contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-    # 結果を表示する
-    cv2.imshow('frame', frame)
-
-    # 現在のフレームを前フレームとして更新する
-    prev_frame = gray
-
-    # キー入力を待つ
-    key = cv2.waitKey(1) & 0xFF
-
-    # 'q'キーが押された場合は終了する
-    if key == ord('q'):
-        break
-    
-# キャプチャをリリースし、ウィンドウを閉じる
-cap.release()
-cv2.destroyAllWindows()
+with torch.no_grad():
+    output = model(input_batch)['out'][0]
+output = output.argmax(0)
+mask = output.byte().cpu().numpy()
+mask = cv2.resize(mask,(w,h))
+img = cv2.resize(img,(w,h))
+plt.gray()
+plt.figure(figsize=(20,20))
+plt.subplot(1,2,1)
+plt.imshow(img)
+plt.subplot(1,2,2)
+plt.imshow(mask)
