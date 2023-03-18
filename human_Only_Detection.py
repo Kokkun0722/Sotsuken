@@ -10,15 +10,19 @@ import requests
 import datetime
 
 # 設定値
-HUMAN_THRESHOLD=5000
-FRAME_RATE=2
-
-SENDABLE=False
+HUMAN_THRESHOLD=500
+FRAME_RATE=5
+EXIST_LIMIT=2
 
 # 検知結果
 prev_exist=False
 human_exist=False
 human_move=0
+
+exist_sum_T=0
+exist_sum_F=0
+
+# その他変数
 
 # 画像送信の定数
 url = "https://notify-api.line.me/api/notify" 
@@ -30,6 +34,7 @@ cap = cv2.VideoCapture(0)
 
 # 前フレームの画像
 prev_frame = None
+prev_exist_flag=[0,0]
 
 while True:
 
@@ -80,42 +85,45 @@ while True:
         human_exist=True
     else:
         human_exist=False
-        
+                
     # 結果を表示する
     human_move=human_exist-prev_exist
-    print(human_exist,human_move,count)        
+    print(human_exist,human_move)        
 
     cv2.imshow('frame', frame)
     
     #別の処理を行う
-    if(human_move!=0):
+    
+    # 存在の合計をとる
+    if(human_exist):
+        exist_sum_F=0
+        exist_sum_T=exist_sum_T+1
+    else:
+        exist_sum_T=0
+        exist_sum_F=exist_sum_F+1
+        
+    print(exist_sum_T,exist_sum_F)
+    exist_flag=[exist_sum_T>EXIST_LIMIT*FRAME_RATE,exist_sum_F>EXIST_LIMIT*FRAME_RATE]
+    exist_diff=[exist_flag[0]-prev_exist_flag[0],exist_flag[1]-prev_exist_flag[1]]
+    print(exist_diff)
+    
+    if(exist_diff[0]>0):
         print("書き記す！！！")
-        # time.sleep(2)
-        if(SENDABLE):
-            cv2.imwrite("output.jpg", frame)
-            time.sleep(1)
+        cv2.imwrite("output.jpg", frame)
         
-        if(human_move==1):
-            message="入室"
-        else:
-            message="退室"
+        dt_now = datetime.datetime.now()
         
-        if(SENDABLE):
-            dt_now = datetime.datetime.now()
-            
-            payload = {"message" :  "\n"+str(dt_now)+"\n"+str(message)}
-            image = r'C:\Users\kokku\output.jpg'
-            try:
-                files = {'imageFile': open(image, 'rb')}
-            except:
-                files = {}
-            
-            print("送信！")
-            res = requests.post(url,params=payload,headers=headers,files=files)
+        payload = {"message" :  "\n"+str(dt_now)+"\n"+str("入室")}
+        image = r'C:\Users\kokku\output.jpg'
+        files = {'imageFile': open(image, 'rb')}
+        res = requests.post(url,params=payload,headers=headers,files=files)        
+        time.sleep(2)    
+    
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
     prev_exist=human_exist
+    prev_exist_flag=exist_flag
 
     # キー入力を待つ
     key = cv2.waitKey(1) & 0xFF
