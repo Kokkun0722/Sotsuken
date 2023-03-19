@@ -12,7 +12,8 @@ import datetime
 # 設定値
 HUMAN_THRESHOLD=500
 FRAME_RATE=5
-EXIST_LIMIT=2
+EXIST_LIMIT_T=2
+EXIST_LIMIT_F=5
 
 # 検知結果
 prev_exist=False
@@ -23,6 +24,7 @@ exist_sum_T=0
 exist_sum_F=0
 
 # その他変数
+shot_flag=False
 
 # 画像送信の定数
 url = "https://notify-api.line.me/api/notify" 
@@ -102,16 +104,30 @@ while True:
         exist_sum_T=0
         exist_sum_F=exist_sum_F+1
         
-    exist_flag=[exist_sum_T>EXIST_LIMIT*FRAME_RATE,exist_sum_F>EXIST_LIMIT*FRAME_RATE]
+    exist_flag=[exist_sum_T>EXIST_LIMIT_T*FRAME_RATE,exist_sum_F>EXIST_LIMIT_F*FRAME_RATE]
     exist_diff=[exist_flag[0]-prev_exist_flag[0],exist_flag[1]-prev_exist_flag[1]]
     
     #完全に人がいる/いないを判定
     if(exist_diff[0]):
         dt_now = datetime.datetime.now()
-        print(dt_now,"人がいます",exist_diff[0])
+        print(dt_now,"〇",exist_diff[0])
     elif(exist_diff[1]):
         dt_now = datetime.datetime.now()
-        print(dt_now,"空席です",exist_diff[1])
+        print(dt_now,"✕",exist_diff[1])
+    
+    #写真を送る
+    dt_now = datetime.datetime.now()
+    payload = {"message" :  "\n"+str(dt_now)+"\n"}
+    image = r'C:\Users\kokku\output.jpg'
+    files = {'imageFile': open(image, 'rb')}
+    
+    if(exist_diff[0]==1 and not shot_flag):
+        print("送信！")
+        shot_flag=True
+        res = requests.post(url,params=payload,headers=headers,files=files)
+    
+    if(exist_diff[1]==-1):
+        shot_flag=False
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
