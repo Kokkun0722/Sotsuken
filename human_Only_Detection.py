@@ -88,7 +88,7 @@ while True:
                 
     # 結果を表示する
     human_move=human_exist-prev_exist
-    print(human_exist,human_move)        
+    # print(human_exist,human_move)        
 
     cv2.imshow('frame', frame)
     
@@ -102,23 +102,16 @@ while True:
         exist_sum_T=0
         exist_sum_F=exist_sum_F+1
         
-    print(exist_sum_T,exist_sum_F)
     exist_flag=[exist_sum_T>EXIST_LIMIT*FRAME_RATE,exist_sum_F>EXIST_LIMIT*FRAME_RATE]
     exist_diff=[exist_flag[0]-prev_exist_flag[0],exist_flag[1]-prev_exist_flag[1]]
-    print(exist_diff)
     
-    if(exist_diff[0]>0):
-        print("書き記す！！！")
-        cv2.imwrite("output.jpg", frame)
-        
+    #完全に人がいる/いないを判定
+    if(exist_diff[0]):
         dt_now = datetime.datetime.now()
-        
-        payload = {"message" :  "\n"+str(dt_now)+"\n"+str("入室")}
-        image = r'C:\Users\kokku\output.jpg'
-        files = {'imageFile': open(image, 'rb')}
-        res = requests.post(url,params=payload,headers=headers,files=files)        
-        time.sleep(2)    
-    
+        print(dt_now,"人がいます",exist_diff[0])
+    elif(exist_diff[1]):
+        dt_now = datetime.datetime.now()
+        print(dt_now,"空席です",exist_diff[1])
     
     # 現在のフレームを前フレームとして更新する
     prev_frame = gray
