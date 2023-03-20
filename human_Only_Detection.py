@@ -9,6 +9,8 @@ import time
 import requests
 import datetime
 
+import test_HSV
+
 # 設定値
 HUMAN_THRESHOLD=500
 FRAME_RATE=5
@@ -49,6 +51,7 @@ while True:
 
     # グレースケールに変換する
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # gray=test_HSV.HSV_Devider(frame)[2]
 
     # 初めてのフレームの場合は前フレームを更新する
     if prev_frame is None:
@@ -79,7 +82,7 @@ while True:
             color=(0, 0, 255)
         else:
             color=(255,255,0)
-        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
+        cv2.rectangle(gray, (x, y), (x+w, y+h), color, 2)
 
     # 変化が大きければOを、そうでなければXを表示
     centroid=None
@@ -92,7 +95,7 @@ while True:
     human_move=human_exist-prev_exist
     # print(human_exist,human_move)        
 
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', gray)
     
     #別の処理を行う
     
@@ -128,7 +131,7 @@ while True:
     
         print("送信！")
         shot_flag=True
-        res = requests.post(url,params=payload,headers=headers,files=files)
+        # res = requests.post(url,params=payload,headers=headers,files=files)
     
     if(exist_diff[1]==-1):
         shot_flag=False
