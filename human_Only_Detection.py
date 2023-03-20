@@ -114,14 +114,18 @@ while True:
     elif(exist_diff[1]):
         dt_now = datetime.datetime.now()
         print(dt_now,"✕",exist_diff[1])
-    
-    #写真を送る
-    dt_now = datetime.datetime.now()
-    payload = {"message" :  "\n"+str(dt_now)+"\n"}
-    image = r'C:\Users\kokku\output.jpg'
-    files = {'imageFile': open(image, 'rb')}
-    
+        
     if(exist_diff[0]==1 and not shot_flag):
+        #写真を送る        
+        print("書き記す！！！")
+        cv2.imwrite("output.jpg", frame)
+        time.sleep(2)
+    
+        dt_now = datetime.datetime.now()
+        payload = {"message" :  "\n"+str(dt_now)+"\n"}
+        image = r'C:\Users\kokku\output.jpg'
+        files = {'imageFile': open(image, 'rb')}
+    
         print("送信！")
         shot_flag=True
         res = requests.post(url,params=payload,headers=headers,files=files)

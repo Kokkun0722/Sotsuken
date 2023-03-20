@@ -1,26 +1,13 @@
-import cv2
-import numpy as np
+import rembg
 
-cap = cv2.VideoCapture(0)
-ret, frame = cap.read()
+from rembg import remove
+from PIL import Image
 
-gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-human_cascade = cv2.CascadeClassifier('haarcascade_fullbody.xml')
+path_str="C:\\Users\\kokku\\Desktop\\声掛けカメラプログラム\\"
 
-human_rects = human_cascade.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5)
+input_path=path_str+"man.jpg"
+output_path=path_str+"out.png"
 
-if len(human_rects) > 0:
-    # 人間が見つかった場合
-    for (x,y,w,h) in human_rects:
-        cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-    human_img = frame
-else:
-    # 人間が見つからなかった場合
-    contours, _ = cv2.findContours(gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    x,y,w,h = cv2.boundingRect(contours[0])
-    human_img = frame[y:y+h, x:x+w]
-
-cv2.imshow('human_only', human_img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-cap.release()
+input_image=Image.open(input_path)
+output_image=remove(input_image)
+output_image.save(output_path)
