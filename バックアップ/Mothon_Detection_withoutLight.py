@@ -9,8 +9,6 @@ import time
 import requests
 import datetime
 
-import test_HSV
-
 # 設定値
 HUMAN_THRESHOLD=500
 FRAME_RATE=5
@@ -51,7 +49,6 @@ while True:
 
     # グレースケールに変換する
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # gray=test_HSV.HSV_Devider(frame)[0]
 
     # 初めてのフレームの場合は前フレームを更新する
     if prev_frame is None:
