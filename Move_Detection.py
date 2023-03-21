@@ -9,8 +9,6 @@ import time
 import requests
 import datetime
 
-import test_HSV
-
 # 設定値
 HUMAN_THRESHOLD=500
 FRAME_RATE=5
@@ -51,15 +49,11 @@ while True:
 
     # グレースケールに変換する
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # gray=test_HSV.HSV_Devider(frame)[0]
 
     # 初めてのフレームの場合は前フレームを更新する
     if prev_frame is None:
         prev_frame = gray
         continue
-
-    # 面積の総和
-    count = 0
     
     # 2つのフレームの差分を求める
     diff = cv2.absdiff(prev_frame, gray)
@@ -69,6 +63,8 @@ while True:
 
     # 輪郭を抽出する
     contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # 面積の総和
+    count = 0
 
     # 輪郭があれば、変化があったことを示す赤い矩形を描画する
     rect_num = 0
@@ -82,7 +78,7 @@ while True:
             color=(0, 0, 255)
         else:
             color=(255,255,0)
-        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
+        cv2.rectangle(diff, (x, y), (x+w, y+h), color, 2)
 
     # 変化が大きければOを、そうでなければXを表示
     centroid=None
@@ -94,11 +90,9 @@ while True:
     # 結果を表示する
     human_move=human_exist-prev_exist
     # print(human_exist,human_move)        
-
-    cv2.imshow('frame', frame)
+    cv2.imshow('frame', diff)
     
     #別の処理を行う
-    
     # 存在の合計をとる
     if(human_exist):
         exist_sum_F=0
@@ -110,13 +104,15 @@ while True:
     exist_flag=[exist_sum_T>EXIST_LIMIT_T*FRAME_RATE,exist_sum_F>EXIST_LIMIT_F*FRAME_RATE]
     exist_diff=[exist_flag[0]-prev_exist_flag[0],exist_flag[1]-prev_exist_flag[1]]
     
+    print(exist_diff)
+    
     #完全に人がいる/いないを判定
-    if(exist_diff[0]):
-        dt_now = datetime.datetime.now()
-        print(dt_now,"〇",exist_diff[0])
-    elif(exist_diff[1]):
-        dt_now = datetime.datetime.now()
-        print(dt_now,"✕",exist_diff[1])
+    # if(exist_diff[0]):
+    #     dt_now = datetime.datetime.now()
+    #     print(dt_now,"〇",exist_diff[0])
+    # elif(exist_diff[1]):
+    #     dt_now = datetime.datetime.now()
+    #     print(dt_now,"✕",exist_diff[1])
         
     if(exist_diff[0]==1 and not shot_flag):
         #写真を送る        
