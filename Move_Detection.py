@@ -9,6 +9,8 @@ import time
 import requests
 import datetime
 
+import Call_Out
+
 # 設定値
 HUMAN_THRESHOLD=500
 FRAME_RATE=5
@@ -115,7 +117,8 @@ while True:
     #     print(dt_now,"✕",exist_diff[1])
         
     if(exist_diff[0]==1 and not shot_flag):
-        #写真を送る        
+        #写真を送る
+        Call_Out.Call()   
         print("書き記す！！！")
         cv2.imwrite("output.jpg", frame)
         time.sleep(2)
