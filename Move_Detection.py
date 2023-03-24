@@ -9,7 +9,8 @@ import time
 import requests
 import datetime
 
-import Call_Out
+# import Call_Out
+import test_pyttsx3 as Test
 
 # 設定値
 HUMAN_THRESHOLD=500
@@ -92,7 +93,7 @@ while True:
     # 結果を表示する
     human_move=human_exist-prev_exist
     # print(human_exist,human_move)        
-    cv2.imshow('frame', diff)
+    cv2.imshow('frame', frame)
     
     #別の処理を行う
     # 存在の合計をとる
@@ -115,10 +116,15 @@ while True:
     # elif(exist_diff[1]):
     #     dt_now = datetime.datetime.now()
     #     print(dt_now,"✕",exist_diff[1])
-        
+    
+    if(exist_diff[0]==1):
+        Test.Ring("start.mp3")
+    elif(exist_diff[1]==1):
+        Test.Ring("finish.mp3")
+    
     if(exist_diff[0]==1 and not shot_flag):
         #写真を送る
-        Call_Out.Call()   
+        # Call_Out.Call()
         print("書き記す！！！")
         cv2.imwrite("output.jpg", frame)
         time.sleep(2)
@@ -153,3 +159,4 @@ while True:
 # キャプチャをリリースし、ウィンドウを閉じる
 cap.release()
 cv2.destroyAllWindows()
+Test.End()

@@ -22,10 +22,7 @@ def Ring(file_name):
 def End():
     pygame.mixer.quit()
 
-Call("おっぱお")
-Ring("start.mp3")
-Ring("finish.mp3")
-End()
+#時間・天気の取得
     
 #「今は深夜の12時ですよ？」
 #「雨降ってますよ？」
