@@ -1,11 +1,13 @@
 import pyttsx3
 import pygame
 
+
 #変数
 DIR_PATH="C:\\Users\\kokku\Desktop\\声掛けカメラプログラム\\"
 
-# 初期化
-pygame.init()
+def INIT():
+    # 初期化
+    pygame.init()
 
 def Call(message):
     engine = pyttsx3.init()

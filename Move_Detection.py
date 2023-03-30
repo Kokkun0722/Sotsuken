@@ -6,17 +6,17 @@
 
 import cv2
 import time
-import requests
+# import requests
 import datetime
-
 # import Call_Out
-import test_pyttsx3 as Test
+# import test_pyttsx3 as Test
+# import test_speechRecognition as sr
 
 # 設定値
-HUMAN_THRESHOLD=500
+HUMAN_THRESHOLD=1000
 FRAME_RATE=5
 EXIST_LIMIT_T=2
-EXIST_LIMIT_F=5
+EXIST_LIMIT_F=2
 
 # 検知結果
 prev_exist=False
@@ -81,7 +81,7 @@ while True:
             color=(0, 0, 255)
         else:
             color=(255,255,0)
-        cv2.rectangle(diff, (x, y), (x+w, y+h), color, 2)
+        cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
 
     # 変化が大きければOを、そうでなければXを表示
     centroid=None
@@ -92,7 +92,7 @@ while True:
                 
     # 結果を表示する
     human_move=human_exist-prev_exist
-    # print(human_exist,human_move)        
+    # print(human_exist,human_move,shot_flag)        
     cv2.imshow('frame', frame)
     
     #別の処理を行う
@@ -107,21 +107,8 @@ while True:
     exist_flag=[exist_sum_T>EXIST_LIMIT_T*FRAME_RATE,exist_sum_F>EXIST_LIMIT_F*FRAME_RATE]
     exist_diff=[exist_flag[0]-prev_exist_flag[0],exist_flag[1]-prev_exist_flag[1]]
     
-    print(exist_diff)
-    
-    #完全に人がいる/いないを判定
-    # if(exist_diff[0]):
-    #     dt_now = datetime.datetime.now()
-    #     print(dt_now,"〇",exist_diff[0])
-    # elif(exist_diff[1]):
-    #     dt_now = datetime.datetime.now()
-    #     print(dt_now,"✕",exist_diff[1])
-    
-    if(exist_diff[0]==1):
-        Test.Ring("start.mp3")
-    elif(exist_diff[1]==1):
-        Test.Ring("finish.mp3")
-    
+    print(exist_diff,shot_flag,count)
+        
     if(exist_diff[0]==1 and not shot_flag):
         #写真を送る
         # Call_Out.Call()
@@ -136,8 +123,10 @@ while True:
     
         print("送信！")
         shot_flag=True
-        res = requests.post(url,params=payload,headers=headers,files=files)
-    
+        # res = requests.post(url,params=payload,headers=headers,files=files)
+
+        #チャット開始
+        # sr.Main()
     if(exist_diff[1]==-1):
         shot_flag=False
     
@@ -159,4 +148,4 @@ while True:
 # キャプチャをリリースし、ウィンドウを閉じる
 cap.release()
 cv2.destroyAllWindows()
-Test.End()
+# Test.End()
