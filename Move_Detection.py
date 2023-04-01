@@ -107,7 +107,7 @@ while True:
     exist_flag=[exist_sum_T>EXIST_LIMIT_T*FRAME_RATE,exist_sum_F>EXIST_LIMIT_F*FRAME_RATE]
     exist_diff=[exist_flag[0]-prev_exist_flag[0],exist_flag[1]-prev_exist_flag[1]]
     
-    print(exist_diff,shot_flag,count)
+    print(human_exist,exist_diff,shot_flag,count)
         
     if(exist_diff[0]==1 and not shot_flag):
         #写真を送る
