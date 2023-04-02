@@ -23,3 +23,5 @@ def Ring(file_name):
 
 def End():
     pygame.mixer.quit()
+    
+Call("こんにちは")
