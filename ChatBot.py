@@ -13,9 +13,6 @@ def ChatBot():
     temperature = weather_data['main']['temp']
     weather = weather_data['weather'][0]['main']
 
-    # 家にとどまるように促すメッセージを定義
-    stay_home_message = "今日は外出せずに家でお過ごしになることをおすすめします。"
-
     # 現在の時間に応じたメッセージを選択
     if 5 <= hour < 12:
         greeting = "おはようございます。"
@@ -30,13 +27,13 @@ def ChatBot():
     elif 0 <= hour <= 6:
         message="もう夜も遅いので、危ないですよ。眠れないのであれば、寝室でリラックスするといいかもしれませんよ。"
     elif weather == 'Rain':
-        message = "今日は雨が降っています。今日は外出せずに、家でお過ごしになることをおすすめします。"
+        message = "今日は雨が降っています。出かけるのであれば、傘を忘れずに。"
     elif weather == 'Snow':
-        message = "今日は雪が降っています。今日は外出せずに、家でお過ごしになることをおすすめします。"
+        message = "今日は雪が降っています。雪で滑ると危ないので、家で待機しましょう。"
     elif temperature < 10:
-        message = "今日は寒いですね。今日は外出せずに、家でお過ごしになることをおすすめします。"
+        message = "今日は寒いですね。上着などを羽織った方がいいですよ。"
     elif temperature > 30:
-        message = "今日は暑いですね。今日は外出せずに、家でお過ごしになることをおすすめします。"
+        message = "今日は暑いですね。スポーツドリンクを持っておきましょう。"
     else:
-        message = stay_home_message
+        message = "どこかへ出かけるのですか？気を付けてくださいね。"
     return (greeting,message)

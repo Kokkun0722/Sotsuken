@@ -5,6 +5,8 @@ import numpy as np
 import time
 import datetime
 import requests
+import Main_ChatBot_System as MCS
+import Call_Out
 
 # 定数定義
 FRAME_RATE = 30  # fps
@@ -24,11 +26,13 @@ exist_sum_F=0
 shot_flag=False
 prev_exist_flag=[0,0]
 
+isStarted=False
+
 # 画像送信の定数
 url = "https://notify-api.line.me/api/notify" 
 token = "XfeZrJIh1meAmMM38vJVlDoKvfzY2HrX2PpPEFqWRir"
 headers = {"Authorization" : "Bearer "+ token} 
-
+            
 def Motion_Detection(frame):
     # 入力画像を浮動小数点型に変換
     frame = frame.astype(np.float32)
@@ -40,7 +44,6 @@ def Motion_Detection(frame):
     cv2.accumulateWeighted(frame, back_frame, 0.025)
     
     # matをnp.arrayに変換
-    back=back_frame.astype(np.uint8)
     diff=diff_frame.astype(np.uint8)
     
     # gray_diffを作る
@@ -71,6 +74,8 @@ def LINE_UpLoder(frame):
     print("送信！")
     res = requests.post(url,params=payload,headers=headers,files=files)
 
+Call_Out.Call("カメラから離れて、起動までお待ちください。")
+
 # 元ビデオファイル読み込み
 cap = cv2.VideoCapture(0)
 
@@ -85,7 +90,12 @@ while ret == True:
     
     # 動体検知を行う    
     flag,diff=Motion_Detection(frame)
-    print(flag)
+    
+    if(not isStarted and not flag):
+            Call_Out.Call("起動しました！！！")
+            isStarted=True
+            
+            
     cv2.imshow("diff",diff)
     
     # フラグを作る
@@ -105,8 +115,10 @@ while ret == True:
     
     # カメラフラグ関連
     if(exist_diff[0]==1 and not shot_flag):
-        LINE_UpLoder(frame)
-        shot_flag=True
+        if(isStarted):
+            LINE_UpLoder(frame)
+            MCS.Main()
+            shot_flag=True
     if(exist_diff[1]==-1):
         shot_flag=False
     

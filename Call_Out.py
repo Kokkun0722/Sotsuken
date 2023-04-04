@@ -1,9 +1,19 @@
 import pyttsx3
 import pygame
 
-
 #変数
 DIR_PATH="C:\\Users\\kokku\Desktop\\声掛けカメラプログラム\\"
+
+engine = pyttsx3.init()
+
+#rate デフォルト値は200
+rate = engine.getProperty('rate')
+engine.setProperty('rate',120)
+
+#volume デフォルト値は1.0、設定は0.0~1.0
+volume = engine.getProperty('volume')
+engine.setProperty('volume',1.0)
+
 
 def INIT():
     # 初期化
@@ -23,5 +33,3 @@ def Ring(file_name):
 
 def End():
     pygame.mixer.quit()
-    
-Call("こんにちは")

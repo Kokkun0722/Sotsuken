@@ -39,9 +39,12 @@ def Main():
             print("you：", text)
             
         time.sleep(1)  # 1秒待機してから再度音声取得を試みる
+    finish="それでは、いってらっしゃいませ。"
+    Call_Out.Call(finish)
+    print("bot：",finish)
     print()
 
-print()    
-text=Main()
-print(text)
-print()
+# print()    
+# text=Main()
+# print(text)
+# print()

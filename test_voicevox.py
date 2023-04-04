@@ -9,7 +9,7 @@ port = 50021
 
 params = (
     ("text", "田中さんこんにちは、今日も良い天気ですね。"),
-    ("speaker", 3)
+    ("speaker", 50)
 )
 
 response1 = requests.post(
