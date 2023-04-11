@@ -9,11 +9,11 @@ import Main_ChatBot_System as MCS
 import Call_Out
 
 # 定数定義
-FRAME_RATE = 60  # fps
+FRAME_RATE = 30  # fps
 THROUD=2.5*(10**6)
 
 # 設定値
-EXIST_LIMIT_T=1.5
+EXIST_LIMIT_T=2
 EXIST_LIMIT_F=2
 
 # 検知結果
@@ -71,16 +71,8 @@ def LINE_UpLoder(frame):
     image = r'C:\Users\kokku\output.jpg'
     files = {'imageFile': open(image, 'rb')}
 
-    print("写真送信！")
-    requests.post(url,params=payload,headers=headers,files=files)
-
-def Chat():
-    payload = {"message" :  "\n"+str(MCS.Main())+"\n"}
-    image = r'C:\Users\kokku\output.jpg'
-    files = {'imageFile': open(image, 'rb')}
-
-    print("会話送信！")
-    requests.post(url,params=payload,headers=headers)
+    print("送信！")
+    res = requests.post(url,params=payload,headers=headers,files=files)
 
 Call_Out.Call("カメラから離れて、起動までお待ちください。")
 
@@ -102,6 +94,8 @@ while ret == True:
     if(not isStarted and not flag):
             Call_Out.Call("起動しました！！！")
             isStarted=True
+            
+            
     cv2.imshow("diff",diff)
     
     # フラグを作る
@@ -123,7 +117,7 @@ while ret == True:
     if(exist_diff[0]==1 and not shot_flag):
         if(isStarted):
             LINE_UpLoder(frame)
-            # Chat()
+            MCS.Main()
             shot_flag=True
     if(exist_diff[1]==-1):
         shot_flag=False

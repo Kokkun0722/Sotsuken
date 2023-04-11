@@ -14,7 +14,7 @@ def Speech_to_Text():
         # 5秒間のタイムアウトを設定
         r.adjust_for_ambient_noise(source)
         try:
-            audio = r.listen(source, timeout=5, phrase_time_limit=2)
+            audio = r.listen(source, timeout=5, phrase_time_limit=5)
         except:
             return(None)
         try:
@@ -26,30 +26,25 @@ def Speech_to_Text():
             return(None)
 
 def Main():
-    manual=["君の運命の人は僕じゃない","つらいけど否めない","でも離れたくないのさ"]
-    finish="それでは、いってらっしゃいませ。"
-    
-    # manual=cbot.ChatBot()
-    memory=[]
     # 音声を取得できるまで繰り返す
     print()
-    for bot in manual:
+    for bot in cbot.ChatBot():
         print("bot：", bot)
-        memory.append("bot："+bot)
         Call_Out.Call(bot) # 声を出す
         
         text = Speech_to_Text()
         if text is None:
-            print("2秒間音声が検出されませんでした")
+            print("5秒間音声が検出されませんでした")
         else:
             print("you：", text)
-            memory.append("you："+text)
             
-        time.sleep(0.1)  # 1秒待機してから再度音声取得を試みる
+        time.sleep(1)  # 1秒待機してから再度音声取得を試みる
+    finish="それでは、いってらっしゃいませ。"
     Call_Out.Call(finish)
     print("bot：",finish)
-    memory.append("bot："+ finish)
     print()
-    return memory
 
-Main()
+# print()    
+# text=Main()
+# print(text)
+# print()
